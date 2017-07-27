@@ -84,9 +84,9 @@ class Merchant extends Component {
 					}
 				});
 			}
-			else if(response.Error && response.Error.body){
+			else if(response.data.Error && response.data.Error.body){
 				try{
-					let body = JSON.parse(response.Error.body)
+					let body = JSON.parse(response.data.Error.body)
 					this.setState({
 						...this.state,
 						responseMessage: `Error: ${body.code}`,
@@ -95,7 +95,7 @@ class Merchant extends Component {
 				catch(e){
 					this.setState({
 						...this.state,
-						responseMessage: `Error: unknown`,
+						responseMessage: response.data.Error.body
 					});
 				}
 			}

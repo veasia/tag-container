@@ -63,8 +63,9 @@ module.exports = function(router){
 
   function defaultCallBack(err, result){
     if (err) {
-      console.log(err)
-      return { Error: err };
+      let obj = {Error: err};
+      console.log(obj)
+      return obj;
     }
     return { merchants: result };
   }

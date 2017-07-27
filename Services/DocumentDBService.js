@@ -57,7 +57,7 @@ class DocumentDBService{
             }]
         };               
 
-        self.client.queryCollections(databaseLink, querySpec).toArray(function (err, results) {
+        self.client.queryCollections(databaseLink, querySpec).toArray((err, results) => {
             if (err) {
                 callback(err);
 
@@ -74,13 +74,8 @@ class DocumentDBService{
     find(querySpec, callback) {
         var self = this;
 
-        self.client.queryDocuments(self.collection._self, querySpec).toArray(function (err, results) {
-            if (err) {
-                callback(err);
-
-            } else {
-                callback(null, results);
-            }
+        self.client.queryDocuments(self.collection._self, querySpec).toArray(function (err, result) {
+            self.handleError(err, result, callback)
         });
     }
 
@@ -88,32 +83,29 @@ class DocumentDBService{
         var self = this;
 
         item.date = new Date();
-
-        self.client.createDocument(self.collection._self, item, function (err, doc) {
-            if (err) {
-                callback(err);
-
-            } else {
-                callback(null, doc);
+        self.getItemByName(item.MerchantName, (err, result)=>{
+            if(result.length == 0){
+                self.client.createDocument(self.collection._self, item, (err2, result) => {
+                    self.handleError(err2, result, callback)
+                });
             }
-        });
+            else{
+                var err = {body: "Merchant existed!"}
+                self.handleError(err, result, callback)
+            }
+        })
     }
 
     updateItem(item, callback) {
         var self = this;
 
-        self.getItem(item.id, function (err, doc) {
+        self.getItem(item.id, (err, doc) => {
             if (err) {
                 callback(err);
 
             } else {
-                self.client.replaceDocument(doc._self, item, function (err, replaced) {
-                    if (err) {
-                        callback(err);
-
-                    } else {
-                        callback(null, replaced);
-                    }
+                self.client.replaceDocument(doc[0]._self, item, (err2, result) => {
+                    self.handleError(err2, result, callback)
                 });
             }
         });
@@ -130,13 +122,30 @@ class DocumentDBService{
             }]
         };
 
-        self.client.queryDocuments(self.collection._self, querySpec).toArray(function (err, results) {
-            if (err) {
-                callback(err);
-            } else {
-                callback(null, results[0]);
-            }
-        });
+        self.find(querySpec, callback);
+    }
+
+    getItemByName(itemName, callback) {
+        var self = this;
+
+        var querySpec = {
+            query: 'SELECT * FROM root r WHERE r.MerchantName = @name',
+            parameters: [{
+                name: '@name',
+                value: itemName
+            }]
+        };
+
+        self.find(querySpec, callback);
+    }
+
+    handleError(err, result, callback){
+        if (err) {
+            callback(err);
+
+        } else {
+            callback(null, result);
+        }
     }
 }
 

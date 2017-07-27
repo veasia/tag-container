@@ -25,19 +25,13 @@ class MerchantService{
         self.docDBService.find(querySpec, callback);
     }
 
-    addMerchant(body, callback) {
+    addMerchant(item, callback) {
         var self = this;
-        
-        var item = body;
-
         self.docDBService.addItem(item, callback);
     }
 
-    updateMerchant(body, callback) {
+    updateMerchant(item, callback) {
         var self = this;
-
-        var item = body;
-
         self.docDBService.updateItem(item, callback);
     }
 }
